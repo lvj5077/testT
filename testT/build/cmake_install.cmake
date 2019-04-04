@@ -1,4 +1,4 @@
-# Install script for directory: /home/jin/Lingqiu_Jin/testT
+# Install script for directory: /home/jin/testT/testT
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -34,7 +34,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/jin/Lingqiu_Jin/testT/build/src/cmake_install.cmake")
+  include("/home/jin/testT/testT/build/src/cmake_install.cmake")
 
 endif()
 
@@ -46,5 +46,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/jin/Lingqiu_Jin/testT/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/jin/testT/testT/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

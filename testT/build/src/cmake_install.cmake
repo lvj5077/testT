@@ -1,4 +1,4 @@
-# Install script for directory: /home/jin/Lingqiu_Jin/testT/src
+# Install script for directory: /home/jin/testT/testT/src
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

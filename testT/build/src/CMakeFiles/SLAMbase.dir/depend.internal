@@ -3,7 +3,6 @@
 
 src/CMakeFiles/SLAMbase.dir/SLAMbase.cpp.o
  ../include/SLAMbase.h
- /home/jin/Lingqiu_Jin/testT/src/SLAMbase.cpp
  /home/jin/Third_party_packages/opencv-2.4.13.6/modules/calib3d/include/opencv2/calib3d/calib3d.hpp
  /home/jin/Third_party_packages/opencv-2.4.13.6/modules/core/include/opencv2/core/affine.hpp
  /home/jin/Third_party_packages/opencv-2.4.13.6/modules/core/include/opencv2/core/core.hpp
@@ -23,6 +22,7 @@ src/CMakeFiles/SLAMbase.dir/SLAMbase.cpp.o
  /home/jin/Third_party_packages/opencv-2.4.13.6/modules/imgproc/include/opencv2/imgproc/types_c.h
  /home/jin/Third_party_packages/opencv-2.4.13.6/modules/nonfree/include/opencv2/nonfree/features2d.hpp
  /home/jin/Third_party_packages/opencv-2.4.13.6/modules/nonfree/include/opencv2/nonfree/nonfree.hpp
+ /home/jin/testT/testT/src/SLAMbase.cpp
  /usr/include/eigen3/Eigen/Cholesky
  /usr/include/eigen3/Eigen/Core
  /usr/include/eigen3/Eigen/Dense
