@@ -28,11 +28,21 @@ int main( int argc, char** argv )
     int depthH = 3000;
     // 相机内参
     CAMERA_INTRINSIC_PARAMETERS C;
-    C.cx = 315.40594482421875;
-    C.cy = 244.33926391601562;
-    C.fx = 614.8074340820312;
-    C.fy = 614.5072021484375;
-    C.scale = 1000.0;
+
+    // // D415
+    // C.cx = 315.40594482421875;
+    // C.cy = 244.33926391601562;
+    // C.fx = 614.8074340820312;
+    // C.fy = 614.5072021484375;
+
+    // TUM 2
+    C.cx = 325.141442;
+    C.cy = 249.701764;
+    C.fx = 520.908620;
+    C.fy = 521.007327;
+    depthL = 3000;
+    depthH = 30000;
+    C.scale = 5208;
     double camera_matrix_data[3][3] = {
         {C.fx, 0, C.cx},
         {0, C.fy, C.cy},
@@ -49,6 +59,20 @@ int main( int argc, char** argv )
     // 第二个帧的图像点
     vector< cv::Point2f > pts_img;
 
+// 1311870429.331255 rgb/1311870429.331255.png 1311870429.343780 depth/1311870429.343780.png
+// 1311870429.663354 rgb/1311870429.663354.png 1311870429.648289 depth/1311870429.648289.png
+// Camera.fx: 520.908620
+// Camera.fy: 521.007327
+// Camera.cx: 325.141442
+// Camera.cy: 249.701764
+
+
+    // checked // tum rgbd_dataset_freiburg2_desk_with_person good depth!!!
+
+    cv::Mat rgb1 = cv::imread( "/home/jin/Data/rgbd_dataset_freiburg2_desk_with_person/rgb/1311870429.331255.png");
+    cv::Mat rgb2 = cv::imread( "/home/jin/Data/rgbd_dataset_freiburg2_desk_with_person/rgb/1311870429.663354.png");
+    cv::Mat depth1 = cv::imread( "/home/jin/Data/rgbd_dataset_freiburg2_desk_with_person/depth/1311870429.343780.png", -1);
+    cv::Mat depth2 = cv::imread( "/home/jin/Data/rgbd_dataset_freiburg2_desk_with_person/depth/1311870429.648289.png", -1);
 
     // // checked // still camera in feature rich environment
     // cv::Mat rgb1 = cv::imread( "/home/jin/Data/04_04_2019/sCamSscene/color/1554395077.593656341.png");
@@ -64,11 +88,11 @@ int main( int argc, char** argv )
     // cv::Mat depth2 = cv::imread( "/home/jin/Data/04_05_2019/sCamSscene/aligned_depth/1554465502.719020871.png", -1);
 
 
-    // checked // moving camera in feature rich environment
-    cv::Mat rgb1 = cv::imread( "/home/jin/Data/04_05_2019/mCamSscene/color/1554465576.399047303.png");
-    cv::Mat rgb2 = cv::imread( "/home/jin/Data/04_05_2019/mCamSscene/color/1554465583.298357888.png");
-    cv::Mat depth1 = cv::imread( "/home/jin/Data/04_05_2019/mCamSscene/aligned_depth/1554465576.399047303.png", -1);
-    cv::Mat depth2 = cv::imread( "/home/jin/Data/04_05_2019/mCamSscene/aligned_depth/1554465583.298357888.png", -1);
+    // // checked // moving camera in feature rich environment
+    // cv::Mat rgb1 = cv::imread( "/home/jin/Data/04_05_2019/mCamSscene/color/1554465576.399047303.png");
+    // cv::Mat rgb2 = cv::imread( "/home/jin/Data/04_05_2019/mCamSscene/color/1554465583.298357888.png");
+    // cv::Mat depth1 = cv::imread( "/home/jin/Data/04_05_2019/mCamSscene/aligned_depth/1554465576.399047303.png", -1);
+    // cv::Mat depth2 = cv::imread( "/home/jin/Data/04_05_2019/mCamSscene/aligned_depth/1554465583.298357888.png", -1);
 
     // // Still unsolved 04/05/2019// moving camera in normal environment
     // cv::Mat rgb1 = cv::imread( "/home/jin/Data/04_05_2019/mCamSsceneN/color/1554467649.270468410.png");
