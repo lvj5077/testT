@@ -24,34 +24,76 @@ using namespace cv;
 
 int main( int argc, char** argv )
 {
-    // string inFileName;
+    int depthL = 180;
+    int depthH = 3000;
+    // 相机内参
+    CAMERA_INTRINSIC_PARAMETERS C;
+    C.cx = 315.40594482421875;
+    C.cy = 244.33926391601562;
+    C.fx = 614.8074340820312;
+    C.fy = 614.5072021484375;
+    C.scale = 1000.0;
+    double camera_matrix_data[3][3] = {
+        {C.fx, 0, C.cx},
+        {0, C.fy, C.cy},
+        {0, 0, 1}
+    };
+
+    // 构建相机矩阵
+    cv::Mat cameraMatrix( 3, 3, CV_64F, camera_matrix_data );
+
+    // 第一个帧的三维点
+    vector<cv::Point3f> firstPts;
+    // 第二个帧的三维点
+    vector<cv::Point3f> secondPts;
+    // 第二个帧的图像点
+    vector< cv::Point2f > pts_img;
 
 
-    // inFileName = "/home/jin/Data/RV_Data/Translation/Y1/frm_0001.dat";
-    // SR4kFRAME f1 = readSRFrame(inFileName) ;
-
-    // inFileName = "/home/jin/Data/RV_Data/Translation/Y2/frm_0001.dat";
-    // SR4kFRAME f2 = readSRFrame(inFileName) ;
-
-    // // still feature rich
-    // cv::Mat rgb1 = cv::imread( "/home/jin/Data/04_04_2019/cameraStill/color/1554395077.593656341.png");
-    // cv::Mat rgb2 = cv::imread( "/home/jin/Data/04_04_2019/cameraStill/color/1554395077.869748494.png");
-    // cv::Mat depth1 = cv::imread( "/home/jin/Data/04_04_2019/cameraStill/aligned_depth/1554395077.593656341.png", -1);
-    // cv::Mat depth2 = cv::imread( "/home/jin/Data/04_04_2019/cameraStill/aligned_depth/1554395077.869748494.png", -1);
+    // // checked // still camera in feature rich environment
+    // cv::Mat rgb1 = cv::imread( "/home/jin/Data/04_04_2019/sCamSscene/color/1554395077.593656341.png");
+    // cv::Mat rgb2 = cv::imread( "/home/jin/Data/04_04_2019/sCamSscene/color/1554395077.869748494.png");
+    // cv::Mat depth1 = cv::imread( "/home/jin/Data/04_04_2019/sCamSscene/aligned_depth/1554395077.593656341.png", -1);
+    // cv::Mat depth2 = cv::imread( "/home/jin/Data/04_04_2019/sCamSscene/aligned_depth/1554395077.869748494.png", -1);
 
 
-    // // still normal 
-    // cv::Mat rgb1 = cv::imread( "/home/jin/Data/04_05_2019/OBStest6/color/1554465502.049380086.png");
-    // cv::Mat rgb2 = cv::imread( "/home/jin/Data/04_05_2019/OBStest6/color/1554465502.719020871.png");
-    // cv::Mat depth1 = cv::imread( "/home/jin/Data/04_05_2019/OBStest6/aligned_depth/1554465502.049380086.png", -1);
-    // cv::Mat depth2 = cv::imread( "/home/jin/Data/04_05_2019/OBStest6/aligned_depth/1554465502.719020871.png", -1);
+    // // checked // still camera in normal environment
+    // cv::Mat rgb1 = cv::imread( "/home/jin/Data/04_05_2019/sCamSscene/color/1554465502.049380086.png");
+    // cv::Mat rgb2 = cv::imread( "/home/jin/Data/04_05_2019/sCamSscene/color/1554465502.719020871.png");
+    // cv::Mat depth1 = cv::imread( "/home/jin/Data/04_05_2019/sCamSscene/aligned_depth/1554465502.049380086.png", -1);
+    // cv::Mat depth2 = cv::imread( "/home/jin/Data/04_05_2019/sCamSscene/aligned_depth/1554465502.719020871.png", -1);
 
 
-    // move feature rich 
-    cv::Mat rgb1 = cv::imread( "/home/jin/Data/04_05_2019/OBSmv2/color/1554465576.399047303.png");
-    cv::Mat rgb2 = cv::imread( "/home/jin/Data/04_05_2019/OBSmv2/color/1554465583.298357888.png");
-    cv::Mat depth1 = cv::imread( "/home/jin/Data/04_05_2019/OBSmv2/aligned_depth/1554465576.399047303.png", -1);
-    cv::Mat depth2 = cv::imread( "/home/jin/Data/04_05_2019/OBSmv2/aligned_depth/1554465583.298357888.png", -1);
+    // checked // moving camera in feature rich environment
+    cv::Mat rgb1 = cv::imread( "/home/jin/Data/04_05_2019/mCamSscene/color/1554465576.399047303.png");
+    cv::Mat rgb2 = cv::imread( "/home/jin/Data/04_05_2019/mCamSscene/color/1554465583.298357888.png");
+    cv::Mat depth1 = cv::imread( "/home/jin/Data/04_05_2019/mCamSscene/aligned_depth/1554465576.399047303.png", -1);
+    cv::Mat depth2 = cv::imread( "/home/jin/Data/04_05_2019/mCamSscene/aligned_depth/1554465583.298357888.png", -1);
+
+    // // Still unsolved 04/05/2019// moving camera in normal environment
+    // cv::Mat rgb1 = cv::imread( "/home/jin/Data/04_05_2019/mCamSsceneN/color/1554467649.270468410.png");
+    // cv::Mat rgb2 = cv::imread( "/home/jin/Data/04_05_2019/mCamSsceneN/color/1554467651.563677925.png");
+    // cv::Mat depth1 = cv::imread( "/home/jin/Data/04_05_2019/mCamSsceneN/aligned_depth/1554467649.270468410.png", -1);
+    // cv::Mat depth2 = cv::imread( "/home/jin/Data/04_05_2019/mCamSsceneN/aligned_depth/1554467651.563677925", -1);
+
+
+    // my moving object intrusion case
+    cv::Mat f1c = cv::imread( "/home/jin/Data/04_04_2019/sCamDscene/color/1554396069.228104175.png");
+    cv::Mat f2c = cv::imread( "/home/jin/Data/04_04_2019/sCamDscene/color/1554396070.572613295.png");
+    cv::Mat f3c = cv::imread( "/home/jin/Data/04_04_2019/sCamDscene/color/1554396071.901310914.png");
+    cv::Mat f4c = cv::imread( "/home/jin/Data/04_04_2019/sCamDscene/color/1554396073.426762856.png");
+    cv::Mat f5c = cv::imread( "/home/jin/Data/04_04_2019/sCamDscene/color/1554396075.004447541.png");
+    
+    cv::Mat f1d = cv::imread( "/home/jin/Data/04_04_2019/sCamDscene/aligned_depth/1554396069.228104175.png");
+    cv::Mat f2d = cv::imread( "/home/jin/Data/04_04_2019/sCamDscene/aligned_depth/1554396070.572613295.png");
+    cv::Mat f3d = cv::imread( "/home/jin/Data/04_04_2019/sCamDscene/aligned_depth/1554396071.901310914.png");
+    cv::Mat f4d = cv::imread( "/home/jin/Data/04_04_2019/sCamDscene/aligned_depth/1554396073.426762856.png");
+    cv::Mat f5d = cv::imread( "/home/jin/Data/04_04_2019/sCamDscene/aligned_depth/1554396075.004447541.png");
+
+    // cv::Mat rgb1 = f1c;
+    // cv::Mat rgb2 = f5c;
+    // cv::Mat depth1 = f1d;
+    // cv::Mat depth2 = f5d;
 
 
     cv::Ptr<cv::FeatureDetector> _detector;
@@ -63,15 +105,6 @@ int main( int argc, char** argv )
     _detector->detect( rgb1, kp1 );
     _detector->detect( rgb2, kp2 );
 
-    // cv::Ptr<cv::FeatureDetector> detector = cv::ORB::create();
-    // cv::Ptr<cv::DescriptorExtractor> descriptor = cv::ORB::create();
-
-    // vector< cv::KeyPoint > kp1, kp2; 
-    // detector->detect( rgb1, kp1 ); 
-    // detector->detect( rgb2, kp2 );
-    // cv::Mat desp1, desp2;
-    // descriptor->compute( rgb1, kp1, desp1 );
-    // descriptor->compute( rgb2, kp2, desp2 );
 
     cout<<"Key points of two images: "<<kp1.size()<<", "<<kp2.size()<<endl;
     
@@ -100,8 +133,9 @@ int main( int argc, char** argv )
     cv::imwrite( "./data/matches.png", imgMatches );
     cv::waitKey( 0 );
 
+
+
     // 筛选匹配，把距离太大的去掉
-    // 这里使用的准则是去掉大于四倍最小距离的匹配
     vector< cv::DMatch > goodMatches;
     double minDis = 9999;
     for ( size_t i=0; i<matches.size(); i++ )
@@ -112,8 +146,24 @@ int main( int argc, char** argv )
 
     for ( size_t i=0; i<matches.size(); i++ )
     {
-        if (matches[i].distance < 4*minDis)
+        cv::Point2f p1 = kp1[matches[i].queryIdx].pt;
+        cv::Point2f p2 = kp2[matches[i].trainIdx].pt;
+
+        ushort d1 = depth1.ptr<ushort>( int(p1.y) )[ int(p1.x) ];
+        ushort d2 = depth2.ptr<ushort>( int(p2.y) )[ int(p2.x) ];
+        if (matches[i].distance < 5*minDis && d1>depthL&&d1<depthH && d2>depthL&&d2<depthH ){
             goodMatches.push_back( matches[i] );
+            // 将(u,v,d)转成(x,y,z)
+            cv::Point3f pt1 ( p1.x, p1.y, d1 );
+            cv::Point3f pd1 = point2dTo3d( pt1, C );
+            firstPts.push_back( pd1 );
+
+            pts_img.push_back( p2 );
+
+            cv::Point3f pt2 ( p2.x, p2.y, d2 );
+            cv::Point3f pd2 = point2dTo3d( pt2, C );
+            secondPts.push_back( pd2 );
+        }
     }
 
     // 显示 good matches
@@ -123,53 +173,14 @@ int main( int argc, char** argv )
     cv::imwrite( "./data/good_matches.png", imgMatches );
     cv::waitKey(0);
 
-    // 计算图像间的运动关系
-    // 关键函数：cv::solvePnPRansac()
-    // 为调用此函数准备必要的参数
-    
-    // 第一个帧的三维点
-    vector<cv::Point3f> pts_obj;
-    // 第二个帧的图像点
-    vector< cv::Point2f > pts_img;
 
-    // 相机内参
-    CAMERA_INTRINSIC_PARAMETERS C;
-    C.cx = 315.40594482421875;
-    C.cy = 244.33926391601562;
-    C.fx = 614.8074340820312;
-    C.fy = 614.5072021484375;
-    C.scale = 1000.0;
-
-    for (size_t i=0; i<goodMatches.size(); i++)
-    {
-        // query 是第一个, train 是第二个
-        cv::Point2f p = kp1[goodMatches[i].queryIdx].pt;
-        // 获取d是要小心！x是向右的，y是向下的，所以y才是行，x是列！
-        ushort d = depth1.ptr<ushort>( int(p.y) )[ int(p.x) ];
-        if (d < 300 || d >4000)
-            continue;
-
-
-        // 将(u,v,d)转成(x,y,z)
-        cv::Point3f pt ( p.x, p.y, d );
-        cv::Point3f pd = point2dTo3d( pt, C );
-        pts_obj.push_back( pd );
-
-        
-        pts_img.push_back( cv::Point2f( kp2[goodMatches[i].trainIdx].pt ) );
-    }
-
-    double camera_matrix_data[3][3] = {
-        {C.fx, 0, C.cx},
-        {0, C.fy, C.cy},
-        {0, 0, 1}
-    };
-
-    // 构建相机矩阵
-    cv::Mat cameraMatrix( 3, 3, CV_64F, camera_matrix_data );
     cv::Mat rvec, tvec, inliers;
+
+    // cout << "firstPts.size() " << firstPts.size()<<endl;
+    // cout << "pts_img.size() " << pts_img.size()<<endl;
+    
     // 求解pnp
-    cv::solvePnPRansac( pts_obj, pts_img, cameraMatrix, cv::Mat(), rvec, tvec, false, 100, 1, 50, inliers );
+    cv::solvePnPRansac( firstPts, pts_img, cameraMatrix, cv::Mat(), rvec, tvec, false, 100, 5, 100, inliers );
 
     cout<<"inliers: "<<inliers.rows<<endl;
     cout<<"R="<<rvec<<endl;
@@ -183,7 +194,7 @@ int main( int argc, char** argv )
     tvec.copyTo(T(cv::Rect(3, 0, 1, 3)));
     
 
-    cout<<"T="<<T<<endl;
+    cout<<"T="<<T<<endl<<endl;
 
 
     // 画出inliers匹配 
@@ -191,7 +202,9 @@ int main( int argc, char** argv )
     for (size_t i=0; i<inliers.rows; i++)
     {
         matchesShow.push_back( goodMatches[inliers.ptr<int>(i)[0]] );    
+        // cout << inliers.ptr<int>(i)[0]<<endl;
     }
+
     cv::drawMatches( rgb1, kp1, rgb2, kp2, matchesShow, imgMatches );
     cv::imshow( "inlier matches", imgMatches );
     cv::imwrite( "./data/inliers.png", imgMatches );
@@ -203,147 +216,28 @@ int main( int argc, char** argv )
 
     double sumDist = 0;
     double sumError = 0;
-    for (size_t i=0; i<inliers.rows; i++)
-    {
-        // query 是第一个, train 是第二个
-        cv::Point2f p1 = kp1[goodMatches[ inliers.ptr<int>(i)[0] ].queryIdx].pt;
-        cv::Point2f p2 = kp2[goodMatches[ inliers.ptr<int>(i)[0] ].trainIdx].pt;
-
-        // 获取d是要小心！x是向右的，y是向下的，所以y才是行，x是列！
-        ushort d1 = depth1.ptr<ushort>( int(p1.y) )[ int(p1.x) ];
-        ushort d2 = depth2.ptr<ushort>( int(p2.y) )[ int(p2.x) ];
-        if (d1 < 300 || d2 < 300 || d1 > 4000 || d2>4000){
-            continue;
-        }
-
-        // 将(u,v,d)转成(x,y,z)
-        cv::Point3f pt1 ( p1.x, p1.y, d1 );
-        cv::Point3f pd1 = point2dTo3d( pt1, C );
-        pts_inlier1.push_back( pd1 );
-
-        cv::Point3f pt2 ( p2.x, p2.y, d2 );
-        cv::Point3f pd2 = point2dTo3d( pt2, C );
-        pts_inlier2.push_back( pd2 );
-
-        // cout << "pd1 "<<pd1 <<endl;
-        // cout << "pd2 "<<pd2 <<endl;
-        cv::Mat ptMat = (cv::Mat_<double>(4, 1) << pd1.x, pd1.y, pd1.z, 1);
-        cv::Mat dstMat = T*ptMat;
-        cv::Point3f projPd1(dstMat.at<double>(0,0), dstMat.at<double>(1,0),dstMat.at<double>(2,0));
-        // cout << "projPd1 "<<projPd1 <<endl;
-
-        // cout << "(pd1*T-pd2) "<< norm(projPd1-pd2)*100 <<"mm" <<endl;
-        // cout << "(pd1-pd2) "<< norm(pd1-pd2)*100 <<"mm" <<endl;
-
-        sumDist = sumDist + norm(pd1-pd2)*100;
-        sumError = sumError + norm(projPd1-pd2)*100;
-
-    }
-
-    cout << "avg error "<< sumError/inliers.rows <<"mm" <<endl;
-    cout << "avg dist "<< sumDist/inliers.rows  <<"mm" <<endl;
-
-    pcl::PointCloud<pcl::PointXYZ> inliersPC1;
-    inliersPC1.points.resize (pts_inlier1.size());
-    pcl::PointCloud<pcl::PointXYZ> inliersPC2;
-    inliersPC2.points.resize (pts_inlier2.size());
-    for (size_t i=0; i<pts_inlier2.size(); i++) {
-
-
-        inliersPC1.points[i].x = pts_inlier1[i].x;
-        inliersPC1.points[i].y = pts_inlier1[i].y;
-        inliersPC1.points[i].z = pts_inlier1[i].z;
-
-        inliersPC2.points[i].x = pts_inlier2[i].x;
-        inliersPC2.points[i].y = pts_inlier2[i].y;
-        inliersPC2.points[i].z = pts_inlier2[i].z;
-    }
-
-
-    inliersPC1.height = 1;
-    inliersPC1.width = inliersPC1.points.size();
-    cout<<"point cloud size = "<<inliersPC1.points.size()<<endl;
-
-    pcl::io::savePCDFile( "/home/jin/Desktop/inliersPC1.pcd", inliersPC1 );
-
-    inliersPC2.height = 1;
-    inliersPC2.width = inliersPC2.points.size();
-    cout<<"point cloud size = "<<inliersPC2.points.size()<<endl;
-
-    pcl::io::savePCDFile( "/home/jin/Desktop/inliersPC2.pcd", inliersPC2 );
-
-/*=======================================3D-3D method====================================================*/
-    vector<cv::Point3f> fixPts;
-    vector<cv::Point3f> mvingPts;
-
+    int countN = 0;
+    int goodinlierN = 0;
+    double goodsumError = 0;
     for (size_t i=0; i<goodMatches.size(); i++)
     {
         // query 是第一个, train 是第二个
         cv::Point2f p1 = kp1[goodMatches[ i ].queryIdx].pt;
         cv::Point2f p2 = kp2[goodMatches[ i ].trainIdx].pt;
-        // 获取d是要小心！x是向右的，y是向下的，所以y才是行，x是列！
-        ushort d1 = depth1.ptr<ushort>( int(p1.y) )[ int(p1.x) ];
-        ushort d2 = depth2.ptr<ushort>( int(p2.y) )[ int(p2.x) ];
-        if (d1 < 300 || d2 < 300 || d1 > 4000 || d2>4000){
-            continue;
-        }
-        // 将(u,v,d)转成(x,y,z)
-        cv::Point3f pt1 ( p1.x, p1.y, d1 );
-        cv::Point3f pd1 = point2dTo3d( pt1, C );
-        fixPts.push_back( pd1 );
-
-        cv::Point3f pt2 ( p2.x, p2.y, d2 );
-        cv::Point3f pd2 = point2dTo3d( pt2, C );
-        mvingPts.push_back( pd2 );
-    }
-
-    cout<<"fixPts: "<<fixPts.size()<<endl;
-    cv::Mat outM3by4;// = cv::Mat::zeros(3,4,CV_64F);
-    cv::Mat inliers3d;
-    cv::estimateAffine3D(mvingPts,fixPts, outM3by4, inliers3d, 3, 0.999);
-    cv::Mat rmat = outM3by4(cv::Rect(0,0,3,3));
-    cv::Mat rvecN;
-
-    cv::Rodrigues(rmat,rvecN);
-
-    cv::Mat tvecN = outM3by4(cv::Rect(3,0,1,3));
-
-
-    cout<<"affine M = "<<outM3by4<<endl;
-    cout<<"R="<<rvecN<<endl;
-    cout<<"t="<<tvecN<<endl;
-    cout<<"inliers3d: "<<inliers3d.rows<<endl;
-
-    T = cv::Mat::eye(4,4,CV_64F);
-    rmat.copyTo(T(cv::Rect(0, 0, 3, 3)));
-    rvecN.copyTo(T(cv::Rect(3, 0, 1, 3)));
-    
-
-    cout<<"T="<<T<<endl;
-
-    sumDist = 0;
-    sumError = 0;
-    for (size_t i=0; i<inliers.rows; i++)
-    {
-        // query 是第一个, train 是第二个
-        cv::Point2f p1 = kp1[goodMatches[ inliers.ptr<int>(i)[0] ].queryIdx].pt;
-        cv::Point2f p2 = kp2[goodMatches[ inliers.ptr<int>(i)[0] ].trainIdx].pt;
 
         // 获取d是要小心！x是向右的，y是向下的，所以y才是行，x是列！
         ushort d1 = depth1.ptr<ushort>( int(p1.y) )[ int(p1.x) ];
         ushort d2 = depth2.ptr<ushort>( int(p2.y) )[ int(p2.x) ];
-        if (d1 < 300 || d2 < 300 || d1 > 4000 || d2>4000){
+        if (d1 == 0 || d2 == 0){
             continue;
         }
 
         // 将(u,v,d)转成(x,y,z)
         cv::Point3f pt1 ( p1.x, p1.y, d1 );
         cv::Point3f pd1 = point2dTo3d( pt1, C );
-        pts_inlier1.push_back( pd1 );
 
         cv::Point3f pt2 ( p2.x, p2.y, d2 );
         cv::Point3f pd2 = point2dTo3d( pt2, C );
-        pts_inlier2.push_back( pd2 );
 
         // cout << "pd1 "<<pd1 <<endl;
         // cout << "pd2 "<<pd2 <<endl;
@@ -352,16 +246,189 @@ int main( int argc, char** argv )
         cv::Point3f projPd1(dstMat.at<double>(0,0), dstMat.at<double>(1,0),dstMat.at<double>(2,0));
         // cout << "projPd1 "<<projPd1 <<endl;
 
-        // cout << "(pd1*T-pd2) "<< norm(projPd1-pd2)*100 <<"mm" <<endl;
+        // cout << "pd1" << pd1 << endl;
+        // cout << "pd2" << pd2 << endl;
+        // cout << "(pd1*T-pd2) "<< norm(projPd1-pd2)*100 <<"mm"<<endl<<endl;
         // cout << "(pd1-pd2) "<< norm(pd1-pd2)*100 <<"mm" <<endl;
 
         sumDist = sumDist + norm(pd1-pd2)*100;
         sumError = sumError + norm(projPd1-pd2)*100;
-
+        countN++;
+        if ( norm(projPd1-pd2)*100 < 30){
+            goodinlierN++;
+            goodsumError = goodsumError+ norm(projPd1-pd2)*100;
+        }
     }
 
-    cout << "avg error "<< sumError/inliers.rows <<"mm" <<endl;
-    cout << "avg dist "<< sumDist/inliers.rows  <<"mm" <<endl;
+    cout << "avg error "<< sumError/countN <<"mm" <<endl;
+    cout << "avg dist "<< sumDist/countN  <<"mm" <<endl;
+
+
+
+    int staticPtsN = 0;
+    sumError = 0;
+
+    vector<cv::Point3f> STfirstPts;
+    // 第二个帧的图像点
+    vector< cv::Point2f > STpts_img;
+
+
+    for (size_t i=0; i<matches.size(); i++)
+    {
+        // query 是第一个, train 是第二个
+        cv::Point2f p1 = kp1[matches[ i ].queryIdx].pt;
+        cv::Point2f p2 = kp2[matches[ i ].trainIdx].pt;
+
+        // 获取d是要小心！x是向右的，y是向下的，所以y才是行，x是列！
+        ushort d1 = depth1.ptr<ushort>( int(p1.y) )[ int(p1.x) ];
+        ushort d2 = depth2.ptr<ushort>( int(p2.y) )[ int(p2.x) ];
+        if (d1<depthL||d1>depthH || d2<depthL||d2>depthH){
+            continue;
+        }
+
+        // 将(u,v,d)转成(x,y,z)
+        cv::Point3f pt1 ( p1.x, p1.y, d1 );
+        cv::Point3f pd1 = point2dTo3d( pt1, C );
+
+        cv::Point3f pt2 ( p2.x, p2.y, d2 );
+        cv::Point3f pd2 = point2dTo3d( pt2, C );
+
+        // cout << "pd1 "<<pd1 <<endl;
+        // cout << "pd2 "<<pd2 <<endl;
+        cv::Mat ptMat = (cv::Mat_<double>(4, 1) << pd1.x, pd1.y, pd1.z, 1);
+        cv::Mat dstMat = T*ptMat;
+        cv::Point3f projPd1(dstMat.at<double>(0,0), dstMat.at<double>(1,0),dstMat.at<double>(2,0));
+        // cout << "projPd1 "<<projPd1 <<endl;
+
+        // cout << "pd1" << pd1 << endl;
+        // cout << "pd2" << pd2 << endl;
+        // cout << "(pd1*T-pd2) "<< norm(projPd1-pd2)*100 <<"mm"<<endl<<endl;
+        // cout << "(pd1-pd2) "<< norm(pd1-pd2)*100 <<"mm" <<endl;
+
+        if ( norm(projPd1-pd2)*100 < 30){
+            sumError = sumError + norm(projPd1-pd2)*100 ;
+            staticPtsN++;    
+
+
+            cv::Point2f p1 = kp1[matches[i].queryIdx].pt;
+            cv::Point2f p2 = kp2[matches[i].trainIdx].pt;
+
+            ushort d1 = depth1.ptr<ushort>( int(p1.y) )[ int(p1.x) ];
+            ushort d2 = depth2.ptr<ushort>( int(p2.y) )[ int(p2.x) ];
+            if (matches[i].distance < 5*minDis && d1>depthL&&d1<depthH && d2>depthL&&d2<depthH ){
+                goodMatches.push_back( matches[i] );
+                // 将(u,v,d)转成(x,y,z)
+                cv::Point3f pt1 ( p1.x, p1.y, d1 );
+                cv::Point3f pd1 = point2dTo3d( pt1, C );
+                STfirstPts.push_back( pd1 );
+
+                STpts_img.push_back( p2 );
+            }
+
+        }
+    }
+    cout << "goodinlierN: " << goodinlierN << "  staticPtsN: " << staticPtsN << endl; 
+    cout << "static error "<< sumError/staticPtsN <<"mm" <<endl;
+    cout << "inlier error "<< goodsumError/goodinlierN <<"mm" <<endl;
+    
+
+
+    // pcl::PointCloud<pcl::PointXYZ> inliersPC1;
+    // inliersPC1.points.resize (pts_inlier1.size());
+    // pcl::PointCloud<pcl::PointXYZ> inliersPC2;
+    // inliersPC2.points.resize (pts_inlier2.size());
+    // for (size_t i=0; i<pts_inlier2.size(); i++) {
+
+
+    //     inliersPC1.points[i].x = pts_inlier1[i].x;
+    //     inliersPC1.points[i].y = pts_inlier1[i].y;
+    //     inliersPC1.points[i].z = pts_inlier1[i].z;
+
+    //     inliersPC2.points[i].x = pts_inlier2[i].x;
+    //     inliersPC2.points[i].y = pts_inlier2[i].y;
+    //     inliersPC2.points[i].z = pts_inlier2[i].z;
+    // }
+
+
+    // inliersPC1.height = 1;
+    // inliersPC1.width = inliersPC1.points.size();
+    // cout<<"point cloud size = "<<inliersPC1.points.size()<<endl;
+
+    // pcl::io::savePCDFile( "/home/jin/Desktop/inliersPC1.pcd", inliersPC1 );
+
+    // inliersPC2.height = 1;
+    // inliersPC2.width = inliersPC2.points.size();
+    // cout<<"point cloud size = "<<inliersPC2.points.size()<<endl;
+
+    // pcl::io::savePCDFile( "/home/jin/Desktop/inliersPC2.pcd", inliersPC2 );
+
+/*=======================================3D-3D method====================================================*/
+
+    // cout<<"firstPts: "<<firstPts.size()<<endl;
+    // cv::Mat outM3by4;// = cv::Mat::zeros(3,4,CV_64F);
+    // cv::Mat inliers3d;
+    // // moving points from first frame to second frame
+    // cv::estimateAffine3D(secondPts,firstPts, outM3by4, inliers3d, 3, 0.999); 
+    // cv::Mat rmat = outM3by4(cv::Rect(0,0,3,3));
+    // cv::Mat rvecN;
+
+    // cv::Rodrigues(rmat,rvecN);
+
+    // cv::Mat tvecN = outM3by4(cv::Rect(3,0,1,3));
+
+
+    // // cout<<"affine M = "<<outM3by4<<endl;
+    // cout<<"R="<<rvecN<<endl;
+    // cout<<"t="<<tvecN<<endl;
+    // cout<<"inliers3d: "<<inliers3d.rows<<endl;
+
+    // T = cv::Mat::eye(4,4,CV_64F);
+    // rmat.copyTo(T(cv::Rect(0, 0, 3, 3)));
+    // rvecN.copyTo(T(cv::Rect(3, 0, 1, 3)));
+    
+
+    // cout<<"T="<<T<<endl;
+
+    // sumDist = 0;
+    // sumError = 0;
+    // countN = 0;
+    // for (size_t i=0; i<inliers.rows; i++)
+    // {
+    //     // query 是第一个, train 是第二个
+    //     cv::Point2f p1 = kp1[goodMatches[ inliers.ptr<int>(i)[0] ].queryIdx].pt;
+    //     cv::Point2f p2 = kp2[goodMatches[ inliers.ptr<int>(i)[0] ].trainIdx].pt;
+
+    //     // 获取d是要小心！x是向右的，y是向下的，所以y才是行，x是列！
+    //     ushort d1 = depth1.ptr<ushort>( int(p1.y) )[ int(p1.x) ];
+    //     ushort d2 = depth2.ptr<ushort>( int(p2.y) )[ int(p2.x) ];
+
+    //     // 将(u,v,d)转成(x,y,z)
+    //     cv::Point3f pt1 ( p1.x, p1.y, d1 );
+    //     cv::Point3f pd1 = point2dTo3d( pt1, C );
+    //     pts_inlier1.push_back( pd1 );
+
+    //     cv::Point3f pt2 ( p2.x, p2.y, d2 );
+    //     cv::Point3f pd2 = point2dTo3d( pt2, C );
+    //     pts_inlier2.push_back( pd2 );
+
+    //     // cout << "pd1 "<<pd1 <<endl;
+    //     // cout << "pd2 "<<pd2 <<endl;
+    //     cv::Mat ptMat = (cv::Mat_<double>(4, 1) << pd1.x, pd1.y, pd1.z, 1);
+    //     cv::Mat dstMat = T*ptMat;
+    //     cv::Point3f projPd1(dstMat.at<double>(0,0), dstMat.at<double>(1,0),dstMat.at<double>(2,0));
+    //     // cout << "projPd1 "<<projPd1 <<endl;
+
+    //     cout << "(pd1*T-pd2) "<< norm(projPd1-pd2)*100 <<"mm" <<endl;
+    //     // cout << "(pd1-pd2) "<< norm(pd1-pd2)*100 <<"mm" <<endl;
+
+    //     sumDist = sumDist + norm(pd1-pd2)*100;
+    //     sumError = sumError + norm(projPd1-pd2)*100;
+    //     countN++;
+
+    // }
+
+    // cout << "avg error "<< sumError/countN <<"mm" <<endl;
+    // cout << "avg dist "<< sumDist/countN <<"mm" <<endl;
 
 
 
