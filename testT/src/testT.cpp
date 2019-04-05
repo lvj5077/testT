@@ -33,12 +33,26 @@ int main( int argc, char** argv )
     // inFileName = "/home/jin/Data/RV_Data/Translation/Y2/frm_0001.dat";
     // SR4kFRAME f2 = readSRFrame(inFileName) ;
 
+    // // still feature rich
+    // cv::Mat rgb1 = cv::imread( "/home/jin/Data/04_04_2019/cameraStill/color/1554395077.593656341.png");
+    // cv::Mat rgb2 = cv::imread( "/home/jin/Data/04_04_2019/cameraStill/color/1554395077.869748494.png");
+    // cv::Mat depth1 = cv::imread( "/home/jin/Data/04_04_2019/cameraStill/aligned_depth/1554395077.593656341.png", -1);
+    // cv::Mat depth2 = cv::imread( "/home/jin/Data/04_04_2019/cameraStill/aligned_depth/1554395077.869748494.png", -1);
 
-    cv::Mat rgb1 = cv::imread( "/home/jin/Data/04_04_2019/cameraStill/color/1554395077.593656341.png");
-    cv::Mat rgb2 = cv::imread( "/home/jin/Data/04_04_2019/cameraStill/color/1554395077.869748494.png");
 
-    cv::Mat depth1 = cv::imread( "/home/jin/Data/04_04_2019/cameraStill/aligned_depth/1554395077.593656341.png", -1);
-    cv::Mat depth2 = cv::imread( "/home/jin/Data/04_04_2019/cameraStill/aligned_depth/1554395077.869748494.png", -1);
+    // // still normal 
+    // cv::Mat rgb1 = cv::imread( "/home/jin/Data/04_05_2019/OBStest6/color/1554465502.049380086.png");
+    // cv::Mat rgb2 = cv::imread( "/home/jin/Data/04_05_2019/OBStest6/color/1554465502.719020871.png");
+    // cv::Mat depth1 = cv::imread( "/home/jin/Data/04_05_2019/OBStest6/aligned_depth/1554465502.049380086.png", -1);
+    // cv::Mat depth2 = cv::imread( "/home/jin/Data/04_05_2019/OBStest6/aligned_depth/1554465502.719020871.png", -1);
+
+
+    // move feature rich 
+    cv::Mat rgb1 = cv::imread( "/home/jin/Data/04_05_2019/OBSmv2/color/1554465576.399047303.png");
+    cv::Mat rgb2 = cv::imread( "/home/jin/Data/04_05_2019/OBSmv2/color/1554465583.298357888.png");
+    cv::Mat depth1 = cv::imread( "/home/jin/Data/04_05_2019/OBSmv2/aligned_depth/1554465576.399047303.png", -1);
+    cv::Mat depth2 = cv::imread( "/home/jin/Data/04_05_2019/OBSmv2/aligned_depth/1554465583.298357888.png", -1);
+
 
     cv::Ptr<cv::FeatureDetector> _detector;
     cv::Ptr<cv::DescriptorExtractor> _descriptor;
@@ -132,7 +146,7 @@ int main( int argc, char** argv )
         cv::Point2f p = kp1[goodMatches[i].queryIdx].pt;
         // 获取d是要小心！x是向右的，y是向下的，所以y才是行，x是列！
         ushort d = depth1.ptr<ushort>( int(p.y) )[ int(p.x) ];
-        if (d == 0)
+        if (d < 300 || d >4000)
             continue;
 
 
@@ -198,7 +212,7 @@ int main( int argc, char** argv )
         // 获取d是要小心！x是向右的，y是向下的，所以y才是行，x是列！
         ushort d1 = depth1.ptr<ushort>( int(p1.y) )[ int(p1.x) ];
         ushort d2 = depth2.ptr<ushort>( int(p2.y) )[ int(p2.x) ];
-        if (d1 == 0 || d2 ==0){
+        if (d1 < 300 || d2 < 300 || d1 > 4000 || d2>4000){
             continue;
         }
 
@@ -216,7 +230,7 @@ int main( int argc, char** argv )
         cv::Mat ptMat = (cv::Mat_<double>(4, 1) << pd1.x, pd1.y, pd1.z, 1);
         cv::Mat dstMat = T*ptMat;
         cv::Point3f projPd1(dstMat.at<double>(0,0), dstMat.at<double>(1,0),dstMat.at<double>(2,0));
-        cout << "projPd1 "<<projPd1 <<endl;
+        // cout << "projPd1 "<<projPd1 <<endl;
 
         // cout << "(pd1*T-pd2) "<< norm(projPd1-pd2)*100 <<"mm" <<endl;
         // cout << "(pd1-pd2) "<< norm(pd1-pd2)*100 <<"mm" <<endl;
@@ -258,7 +272,7 @@ int main( int argc, char** argv )
 
     pcl::io::savePCDFile( "/home/jin/Desktop/inliersPC2.pcd", inliersPC2 );
 
-/*=================================================================================================*/
+/*=======================================3D-3D method====================================================*/
     vector<cv::Point3f> fixPts;
     vector<cv::Point3f> mvingPts;
 
@@ -270,7 +284,7 @@ int main( int argc, char** argv )
         // 获取d是要小心！x是向右的，y是向下的，所以y才是行，x是列！
         ushort d1 = depth1.ptr<ushort>( int(p1.y) )[ int(p1.x) ];
         ushort d2 = depth2.ptr<ushort>( int(p2.y) )[ int(p2.x) ];
-        if (d1 == 0 || d2 ==0){
+        if (d1 < 300 || d2 < 300 || d1 > 4000 || d2>4000){
             continue;
         }
         // 将(u,v,d)转成(x,y,z)
@@ -286,7 +300,7 @@ int main( int argc, char** argv )
     cout<<"fixPts: "<<fixPts.size()<<endl;
     cv::Mat outM3by4;// = cv::Mat::zeros(3,4,CV_64F);
     cv::Mat inliers3d;
-    cv::estimateAffine3D(fixPts, mvingPts, outM3by4, inliers3d, 3, 0.999);
+    cv::estimateAffine3D(mvingPts,fixPts, outM3by4, inliers3d, 3, 0.999);
     cv::Mat rmat = outM3by4(cv::Rect(0,0,3,3));
     cv::Mat rvecN;
 
@@ -299,6 +313,58 @@ int main( int argc, char** argv )
     cout<<"R="<<rvecN<<endl;
     cout<<"t="<<tvecN<<endl;
     cout<<"inliers3d: "<<inliers3d.rows<<endl;
+
+    T = cv::Mat::eye(4,4,CV_64F);
+    rmat.copyTo(T(cv::Rect(0, 0, 3, 3)));
+    rvecN.copyTo(T(cv::Rect(3, 0, 1, 3)));
+    
+
+    cout<<"T="<<T<<endl;
+
+    sumDist = 0;
+    sumError = 0;
+    for (size_t i=0; i<inliers.rows; i++)
+    {
+        // query 是第一个, train 是第二个
+        cv::Point2f p1 = kp1[goodMatches[ inliers.ptr<int>(i)[0] ].queryIdx].pt;
+        cv::Point2f p2 = kp2[goodMatches[ inliers.ptr<int>(i)[0] ].trainIdx].pt;
+
+        // 获取d是要小心！x是向右的，y是向下的，所以y才是行，x是列！
+        ushort d1 = depth1.ptr<ushort>( int(p1.y) )[ int(p1.x) ];
+        ushort d2 = depth2.ptr<ushort>( int(p2.y) )[ int(p2.x) ];
+        if (d1 < 300 || d2 < 300 || d1 > 4000 || d2>4000){
+            continue;
+        }
+
+        // 将(u,v,d)转成(x,y,z)
+        cv::Point3f pt1 ( p1.x, p1.y, d1 );
+        cv::Point3f pd1 = point2dTo3d( pt1, C );
+        pts_inlier1.push_back( pd1 );
+
+        cv::Point3f pt2 ( p2.x, p2.y, d2 );
+        cv::Point3f pd2 = point2dTo3d( pt2, C );
+        pts_inlier2.push_back( pd2 );
+
+        // cout << "pd1 "<<pd1 <<endl;
+        // cout << "pd2 "<<pd2 <<endl;
+        cv::Mat ptMat = (cv::Mat_<double>(4, 1) << pd1.x, pd1.y, pd1.z, 1);
+        cv::Mat dstMat = T*ptMat;
+        cv::Point3f projPd1(dstMat.at<double>(0,0), dstMat.at<double>(1,0),dstMat.at<double>(2,0));
+        // cout << "projPd1 "<<projPd1 <<endl;
+
+        // cout << "(pd1*T-pd2) "<< norm(projPd1-pd2)*100 <<"mm" <<endl;
+        // cout << "(pd1-pd2) "<< norm(pd1-pd2)*100 <<"mm" <<endl;
+
+        sumDist = sumDist + norm(pd1-pd2)*100;
+        sumError = sumError + norm(projPd1-pd2)*100;
+
+    }
+
+    cout << "avg error "<< sumError/inliers.rows <<"mm" <<endl;
+    cout << "avg dist "<< sumDist/inliers.rows  <<"mm" <<endl;
+
+
+
 
     return 0;
 }
